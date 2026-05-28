@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if mode == 'new' %}Новое мероприятие{% else %}Редактирование — {{ event.title }}{% endif %}
+{% endblock %}
+{% block content %}
+{% if mode == 'edit' %}
+  <a href="{{ url_for('admin.event_detail', event_id=event.id) }}" style="color:#5f5e5a;font-size:13px;">← К карточке</a>
+{% else %}
+  <a href="{{ url_for('admin.dashboard') }}" style="color:#5f5e5a;font-size:13px;">← К списку</a>
+{% endif %}
+<h2>{% if mode == 'new' %}Новое мероприятие{% else %}Редактирование мероприятия{% endif %}</h2>
+
+<div class="card">
+  <form method="post">
+    <div class="two-columns">
+      <!-- Левая колонка: Название и Описание -->
+      <div class="left-column">
+        <div class="field">
+          <label>Название *</label>
+          <input type="text" name="title" required maxlength="255"
+                 value="{% if event %}{{ event.title }}{% endif %}">
+        </div>
+
+        <div class="field">
+          <label>Описание *</label>
+          <textarea name="description" required rows="6">{% if event %}{{ event.description }}{% endif %}</textarea>
+        </div>
+      </div>
+
+      <!-- Правая колонка: Все остальные поля -->
+      <div class="right-column">
+        <div style="display:flex; gap:16px;">
+          <div class="field" style="flex:1;">
+            <label>Дата и время *</label>
+            <input type="datetime-local" name="event_date" required
+                   value="{% if event %}{{ event.event_date.strftime('%Y-%m-%dT%H:%M') }}{% endif %}">
+          </div>
+          <div class="field" style="flex:1;">
+            <label>Длительность, минут *</label>
+            <input type="number" name="duration_minutes" required min="1" max="1440"
+                   value="{% if event %}{{ event.duration_minutes }}{% else %}60{% endif %}">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Формат *</label>
+          <select name="format" required>
+            <option value="offline" {% if event and event.format == 'offline' %}selected{% endif %}>Очно (offline)</option>
+            <option value="online" {% if event and event.format == 'online' %}selected{% endif %}>Онлайн (online)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Место (адрес или ссылка для online) *</label>
+          <input type="text" name="location" required maxlength="500"
+                 value="{% if event %}{{ event.location }}{% endif %}"
+                 placeholder="Например: Москва, проспект Вернадского, 78, ауд. А-101">
+        </div>
+
+        <div class="field">
+          <label>Лимит участников *</label>
+          <input type="number" name="max_participants" required min="1" max="100000"
+                 value="{% if event %}{{ event.max_participants }}{% else %}30{% endif %}">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-buttons">
+      <button class="btn" type="submit">
+        {% if mode == 'new' %}Создать{% else %}Сохранить{% endif %}
+      </button>
+      {% if mode == 'edit' %}
+        <a class="btn btn-secondary" href="{{ url_for('admin.event_detail', event_id=event.id) }}">Отмена</a>
+      {% else %}
+        <a class="btn btn-secondary" href="{{ url_for('admin.dashboard') }}">Отмена</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+/* Стили для формы мероприятия - в стиле окна логина */
+
+/* Карточка - как на странице мероприятий */
+.card {
+  background: white;
+  border: 1px solid #eef2f6;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Две колонки */
+.two-columns {
+  display: flex;
+  gap: 48px;
+  margin-bottom: 32px;
+}
+
+.left-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.right-column {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Заголовок h2 */
+h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #2163F6;
+  letter-spacing: -0.5px;
+  margin-bottom: 24px;
+  margin-top: 16px;
+}
+
+/* Контейнер для кнопок */
+.form-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* Поля ввода */
+.field {
+  margin-bottom: 24px;
+}
+
+.field label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: #cbd5e1;
+}
+
+/* Кнопки - ОДИНАКОВАЯ ВЫСОТА */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: #2163F6;
+  color: white;
+  text-decoration: none;
+  box-sizing: border-box;
+  height: 40px;
+  line-height: 1;
+}
+
+.btn:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #2163F6;
+  border: #2163F6 solid 1px;
+}
+
+.btn-secondary:hover {
+  background: #2163F6;
+  color: white;
+  text-decoration: none;
+  transform: translateY(-1px);
+
+}
+
+/* Ссылки назад */
+a[style*="color:#5f5e5a"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
+}
+
+a[style*="color:#5f5e5a"]:hover {
+  color: #3b82f6 !important;
+  text-decoration: none;
+}
+
+/* Адаптивность - на мобильных колонки становятся вертикальными */
+@media (max-width: 768px) {
+  .two-columns {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  h2 {
+    font-size: 24px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    height: 36px;
+    font-size: 13px;
+  }
+  
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 640px) {
+  div[style*="display:flex; gap:16px"] {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .form-buttons {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
+</style>
+{% endblock %}

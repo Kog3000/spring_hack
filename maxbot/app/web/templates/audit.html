@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}Аудит — MAX-бот{% endblock %}
+{% block content %}
+<h2>Журнал аудита</h2>
+<p class="audit-description">Последние 200 событий. Все действия пользователей, организаторов и админов с минимизацией ПД.</p>
+
+<div class="card">
+  <div class="table-wrapper">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>Время</th>
+          <th>Действие</th>
+          <th>User</th>
+          <th>Organizer</th>
+          <th>Admin</th>
+          <th>Event</th>
+          <th>Registration</th>
+          <th>IP</th>
+          <th>Payload</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td data-label="Время"><span class="mono">{{ r.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
+            <td data-label="Действие"><code class="action-code">{{ r.action }}</code></td>
+            <td data-label="User">{{ r.actor_user_id or '—' }}</td>
+            <td data-label="Organizer">{{ r.actor_organizer_id or '—' }}</td>
+            <td data-label="Admin">{{ r.actor_admin_id or '—' }}</td>
+            <td data-label="Event">{{ r.target_event_id or '—' }}</td>
+            <td data-label="Registration">{{ r.target_registration_id or '—' }}</td>
+            <td data-label="IP"><span class="mono">{{ r.ip_address or '—' }}</span></td>
+            <td data-label="Payload" class="payload-cell">
+              {% if r.payload %}
+                <span class="payload">{{ r.payload|tojson }}</span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+/* ===== СТИЛИ ДЛЯ СТРАНИЦЫ АУДИТА ===== */
+
+/* Заголовок */
+h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+.audit-description {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* Карточка */
+.card {
+  background: white;
+  border: 1px solid #eef2f6;
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Обёртка для горизонтальной прокрутки */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Таблица */
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.audit-table th {
+  text-align: left;
+  padding: 14px 12px;
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.audit-table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 13px;
+  color: #334155;
+  vertical-align: top;
+}
+
+.audit-table tr:hover td {
+  background: #fafcff;
+}
+
+/* Моноширинный текст */
+.mono {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  font-size: 12px;
+  color: #475569;
+}
+
+/* Код действия */
+.action-code {
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2163F6;
+  display: inline-block;
+}
+
+/* Ячейка с payload */
+.payload-cell {
+  max-width: 250px;
+}
+
+.payload {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+  font-size: 11px;
+  color: #64748b;
+  word-break: break-all;
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Стили для пустых значений */
+.audit-table td {
+  word-break: break-word;
+}
+
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 24px;
+  }
+  
+  .audit-description {
+    font-size: 13px;
+  }
+  
+  /* Адаптивные карточки для мобильных */
+  .audit-table thead {
+    display: none;
+  }
+  
+  .audit-table tr {
+    display: block;
+    margin-bottom: 16px;
+    border: 1px solid #eef2f6;
+    border-radius: 12px;
+    padding: 12px;
+    background: white;
+  }
+  
+  .audit-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 16px;
+  }
+  
+  .audit-table td:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .audit-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    min-width: 100px;
+    flex-shrink: 0;
+  }
+  
+  .payload-cell {
+    max-width: none;
+  }
+  
+  .payload {
+    word-break: break-word;
+    white-space: normal;
+  }
+  
+  .action-code {
+    font-size: 10px;
+  }
+  
+  .mono {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 20px;
+  }
+  
+  .audit-table td::before {
+    min-width: 80px;
+    font-size: 10px;
+  }
+  
+  .audit-table td {
+    font-size: 12px;
+    gap: 12px;
+  }
+  
+  .action-code {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  
+  .mono {
+    font-size: 10px;
+  }
+}
+</style>
+{% endblock %}

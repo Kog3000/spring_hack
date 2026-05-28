@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}QR-сканер — {{ event.title }}{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+{% endblock %}
+{% block content %}
+<a href="{{ url_for('admin.event_detail', event_id=event.id) }}" style="color:#5f5e5a;font-size:13px;">← К карточке</a>
+<h2>QR-сканер</h2>
+<p style="color:#5f5e5a;">{{ event.title }}</p>
+
+<div class="card" style="max-width:520px;">
+  <div id="reader" style="width:100%;"></div>
+  <div id="result" style="margin-top:16px; padding:16px; border-radius:8px; display:none;"></div>
+</div>
+
+<script>
+const eventId = {{ event.id }};
+let lastToken = null;
+let lastTokenTime = 0;
+
+function showResult(ok, payload) {
+  const box = document.getElementById('result');
+  box.style.display = 'block';
+  if (ok) {
+    box.style.background = '#d4f4d4';
+    box.style.color = '#1a5928';
+    box.innerHTML = `<strong>✓ Допущен</strong><br>${payload.participant || ''} <code>${payload.code || ''}</code>`;
+  } else {
+    box.style.background = '#fadcd9';
+    box.style.color = '#7c1f1f';
+    box.innerHTML = `<strong>✗ ${payload.reason}</strong>` +
+      (payload.participant ? `<br>${payload.participant} <code>${payload.code || ''}</code>` : '');
+  }
+}
+
+async function verify(token) {
+  const now = Date.now();
+  // Защита от повторной отправки одного и того же токена в течение 3 сек
+  if (token === lastToken && (now - lastTokenTime) < 3000) return;
+  lastToken = token;
+  lastTokenTime = now;
+  try {
+    const resp = await fetch("{{ url_for('admin.scan_verify') }}", {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token, event_id: eventId})
+    });
+    const data = await resp.json();
+    showResult(data.ok, data);
+  } catch (e) {
+    showResult(false, {reason: 'Ошибка сети'});
+  }
+}
+
+const scanner = new Html5Qrcode("reader");
+scanner.start(
+  {facingMode: "environment"},
+  {fps: 10, qrbox: {width: 260, height: 260}},
+  (decodedText) => verify(decodedText),
+  (errorMessage) => {/* игнорируем */}
+).catch(err => {
+  document.getElementById('reader').innerHTML =
+    '<p style="color:#7c1f1f;">Не удалось получить доступ к камере. Разрешите доступ в браузере.</p>';
+});
+</script>
+{% endblock %}

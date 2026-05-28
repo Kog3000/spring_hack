@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block title %}Мероприятия — MAX-бот{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+  <h2 class="dashboard-title">
+    {% if role == 'admin' %}Все мероприятия
+    {% elif role == 'controller' %}Назначенные мне мероприятия
+    {% else %}Мои мероприятия
+    {% endif %}
+  </h2>
+  {% if role != 'controller' %}
+    <a class="btn btn-success" href="{{ url_for('admin.event_new') }}">Создать мероприятие</a>
+  {% endif %}
+</div>
+
+{% if not events %}
+  <div class="card">
+    <p class="empty-message">
+      {% if role == 'controller' %}
+        Вам пока не назначено ни одно мероприятие. Обратитесь к организатору.
+      {% else %}
+        Нет мероприятий. Нажмите «Создать мероприятие», чтобы добавить первое.
+      {% endif %}
+    </p>
+  </div>
+{% else %}
+  <div class="card">
+    <div class="table-responsive">
+      <table class="events-table">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Название</th>
+            <th>Формат</th>
+            {% if role != 'controller' %}<th>Места</th>{% endif %}
+            <th>Статус</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in events %}
+            <tr>
+              <td data-label="Дата">{{ ev.date.strftime('%d.%m.%Y %H:%M') }}</td>
+              <td data-label="Название">{{ ev.title }}</td>
+              <td data-label="Формат">{{ ev.format }}</td>
+              {% if role != 'controller' %}<td data-label="Места">{{ ev.taken }} / {{ ev.total }}</td>{% endif %}
+              <td data-label="Статус">
+                {% if ev.closed %}
+                  <span class="badge badge-closed">Закрыта</span>
+                {% elif ev.taken >= ev.total %}
+                  <span class="badge badge-closed">Мест нет</span>
+                {% else %}
+                  <span class="badge badge-confirmed">Открыта</span>
+                {% endif %}
+              </td>
+              <td data-label="Действие">
+                {% if role == 'controller' %}
+                  <a class="btn btn-scan" href="{{ url_for('admin.event_scan', event_id=ev.id) }}">Сканировать</a>
+                {% else %}
+                  <a class="btn" href="{{ url_for('admin.event_detail', event_id=ev.id) }}">Открыть</a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block head %}
+<style>
+/* Заголовок и кнопка создания */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dashboard-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+
+/* Пустое сообщение */
+.empty-message {
+  color: #64748b;
+  text-align: center;
+  padding: 32px;
+  margin: 0;
+}
+
+/* Карточка */
+.card {
+  background: white;
+  border: 1px solid #eef2f6;
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Контейнер для таблицы с горизонтальной прокруткой */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Таблица */
+.events-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.events-table th {
+  text-align: left;
+  padding: 14px 16px;
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 13px;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.events-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #334155;
+}
+
+.events-table tr:hover td {
+  background: #fafcff;
+}
+
+/* Кнопки - высота 40px */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: #2163F6;
+  color: white;
+  text-decoration: none !important;
+  height: 40px;
+  line-height: 1;
+}
+
+.btn:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: #10b981;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-scan {
+  background: #3b82f6;
+}
+
+.btn-scan:hover {
+  background: #2563eb;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-confirmed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-closed {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-title {
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  .btn-success {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .card {
+    border-radius: 12px;
+  }
+  
+  /* Мобильная таблица - карточки */
+  .events-table,
+  .events-table thead,
+  .events-table tbody,
+  .events-table tr,
+  .events-table th,
+  .events-table td {
+    display: block;
+  }
+  
+  .events-table thead {
+    display: none;
+  }
+  
+  .events-table tr {
+    margin-bottom: 16px;
+    border: 1px solid #eef2f6;
+    border-radius: 12px;
+    background: white;
+    padding: 12px;
+  }
+  
+  .events-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 16px;
+  }
+  
+  .events-table td:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .events-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    font-size: 12px;
+    min-width: 80px;
+  }
+  
+  .btn,
+  .btn-scan {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-title {
+    font-size: 20px;
+  }
+  
+  .events-table td::before {
+    min-width: 70px;
+    font-size: 11px;
+  }
+  
+  .events-table td {
+    font-size: 13px;
+  }
+}
+</style>
+{% endblock %}

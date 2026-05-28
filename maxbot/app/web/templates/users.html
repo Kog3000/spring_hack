@@ -1,0 +1,704 @@
+{% extends "base.html" %}
+{% block title %}Пользователи — MAX-бот{% endblock %}
+{% block content %}
+<h2>Пользователи</h2>
+
+<div class="card">
+  <h3>Добавить нового пользователя</h3>
+  <p class="info-text">
+    Создание учёток организаторов, контролёров и техадминов. У каждого пользователя — отдельная учётка с email и паролем для журнала аудита.
+  </p>
+  <form method="post" class="user-form">
+    <div class="form-grid">
+      <div class="field">
+        <label>Email *</label>
+        <input type="email" name="email" required maxlength="255" placeholder="example@mirea.ru">
+      </div>
+      <div class="field">
+        <label>ФИО *</label>
+        <input type="text" name="full_name" required maxlength="255" placeholder="Иванов Иван Иванович">
+      </div>
+      <div class="field">
+        <label>Пароль *</label>
+        <input type="password" name="password" required minlength="6" placeholder="••••••">
+        <small class="field-hint">Передайте пароль пользователю отдельно</small>
+      </div>
+      <div class="field">
+        <label>Роль *</label>
+        <div class="radio-group">
+          <label class="radio-tile">
+            <input type="radio" name="role" value="organizer" required>
+            <span class="radio-tile-text">Организатор</span>
+          </label>
+          <label class="radio-tile">
+            <input type="radio" name="role" value="controller">
+            <span class="radio-tile-text">Контролёр</span>
+          </label>
+          <label class="radio-tile">
+            <input type="radio" name="role" value="admin">
+            <span class="radio-tile-text">Техадмин</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-success" type="submit">Создать учётку</button>
+  </form>
+</div>
+
+{% macro user_row(role_val, user_id, name, email, is_active, is_self=False) %}
+  <tr>
+    <td data-label="ФИО">{{ name }}</td>
+    <td data-label="Email">{{ email }}</td>
+    <td data-label="Статус">
+      {% if is_active %}<span class="badge badge-confirmed">Активен</span>
+      {% else %}<span class="badge badge-closed">Отключён</span>{% endif %}
+    </td>
+    <td data-label="Действия" class="actions-cell">
+      <button class="btn btn-secondary btn-sm" type="button"
+              onclick="toggleEditRow('edit-{{ role_val }}-{{ user_id }}')">
+        Изменить
+      </button>
+      {% if not is_self %}
+        <form method="post"
+              action="{{ url_for('admin.user_toggle', role_val=role_val, user_id=user_id) }}"
+              class="inline-form">
+          {% if is_active %}
+            <button class="btn btn-danger btn-sm" type="submit"
+                    onclick="return confirm('Отключить учётку {{ email }}? Пользователь не сможет войти.');">
+              Отключить
+            </button>
+          {% else %}
+            <button class="btn btn-success btn-sm" type="submit"
+                    onclick="return confirm('Активировать учётку {{ email }}?');">
+              Активировать
+            </button>
+          {% endif %}
+        </form>
+      {% else %}
+        <span class="self-label">(это вы)</span>
+      {% endif %}
+    </td>
+  </tr>
+  <tr id="edit-{{ role_val }}-{{ user_id }}" class="edit-row">
+    <td colspan="4">
+      <form method="post"
+            action="{{ url_for('admin.user_edit', role_val=role_val, user_id=user_id) }}"
+            class="edit-form">
+        <div class="edit-form-fields">
+          <div class="field">
+            <label>ФИО</label>
+            <input type="text" name="full_name" value="{{ name }}" required>
+          </div>
+          <div class="field">
+            <label>Новый пароль (если меняем)</label>
+            <input type="password" name="new_password" minlength="6"
+                   placeholder="оставьте пустым чтобы не менять">
+          </div>
+          <div class="edit-form-actions">
+            <button class="btn btn-success btn-sm" type="submit">Сохранить</button>
+            <button class="btn btn-secondary btn-sm" type="button"
+                    onclick="toggleEditRow('edit-{{ role_val }}-{{ user_id }}')">Отмена</button>
+          </div>
+        </div>
+        <p class="edit-hint">
+          Email ({{ email }}) и роль не меняются. Для смены роли создайте новую учётку.
+        </p>
+      </form>
+    </td>
+  </tr>
+{% endmacro %}
+
+<div class="card">
+  <h3>Организаторы ({{ organizers|length }})</h3>
+  {% if not organizers %}
+    <p class="empty-message">Пока нет организаторов.</p>
+  {% else %}
+    <div class="table-wrapper">
+      <table class="users-table">
+        <thead>
+          <tr><th>ФИО</th><th>Email</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+          {% for o in organizers %}
+            {{ user_row('organizer', o.id, o.full_name, o.email, o.is_active) }}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h3>Контролёры ({{ controllers|length }})</h3>
+  {% if not controllers %}
+    <p class="empty-message">Пока нет контролёров.</p>
+  {% else %}
+    <div class="table-wrapper">
+      <table class="users-table">
+        <thead>
+          <tr><th>ФИО</th><th>Email</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+          {% for c in controllers %}
+            {{ user_row('controller', c.id, c.full_name, c.email, c.is_active) }}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h3>Техадмины ({{ admins|length }})</h3>
+  {% if not admins %}
+    <p class="empty-message">Нет техадминов.</p>
+  {% else %}
+    <div class="table-wrapper">
+      <table class="users-table">
+        <thead>
+          <tr><th>Имя</th><th>Email</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody>
+          {% for a in admins %}
+            {{ user_row('admin', a.id, a.display_name, a.email, a.is_active, is_self=(a.id == session.uid)) }}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+function toggleEditRow(rowId) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  row.classList.toggle('is-open');
+}
+</script>
+
+<style>
+
+/* Заголовок */
+h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.5px;
+  margin-bottom: 24px;
+}
+
+/* Карточки */
+.card {
+  background: white;
+  border: 1px solid #eef2f6;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2163F6;
+  margin-bottom: 16px;
+}
+
+/* Информационный текст */
+.info-text {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.field-hint {
+  display: block;
+  color: #94a3b8;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* Форма создания пользователя */
+.user-form {
+  margin-top: 8px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.form-grid .field:last-child {
+  grid-column: span 2;
+}
+
+/* Радиокнопки — tile-cards с идеальным выравниванием через grid */
+.radio-group {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.radio-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-weight: 500;
+  font-size: 14px;
+  color: #334155;
+  user-select: none;
+  min-width: 0;
+}
+
+.radio-tile:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.radio-tile input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: #2163F6;
+  cursor: pointer;
+}
+
+.radio-tile-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radio-tile:has(input[type="radio"]:checked) {
+  border-color: #2163F6;
+  background: #eff4ff;
+  color: #2163F6;
+}
+
+.radio-tile:focus-within {
+  border-color: #2163F6;
+  box-shadow: 0 0 0 3px rgba(33, 99, 246, 0.12);
+}
+
+/* Поля ввода */
+.field {
+  margin-bottom: 0;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: #2163F6;
+  box-shadow: 0 0 0 3px rgba(33, 99, 246, 0.1);
+}
+
+/* Кнопки */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: #2163F6;
+  color: white;
+  text-decoration: none !important;
+  height: 40px;
+  line-height: 1;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  background: #1e293b;
+}
+
+.btn-sm {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+.btn-success {
+  background: #10b981;
+}
+
+.btn-success:hover {
+  background: #059669;
+}
+
+.btn-danger {
+  background: #ef4444;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #2163F6;
+  border: 1px solid #2163F6;
+}
+
+.btn-secondary:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+/* Таблицы */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th {
+  text-align: left;
+  padding: 12px 12px;
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 13px;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.users-table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.users-table tr:hover td {
+  background: #fafcff;
+}
+
+/* Ячейка с действиями */
+.actions-cell {
+  white-space: nowrap;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inline-form {
+  display: inline;
+}
+
+.self-label {
+  color: #94a3b8;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Строка редактирования: скрыта по умолчанию, открывается классом .is-open */
+.edit-row {
+  display: none;
+  background: #f8fafc;
+}
+
+.edit-row.is-open {
+  display: table-row;
+}
+
+.edit-row td {
+  padding: 16px;
+}
+
+.edit-form {
+  margin: 0;
+}
+
+.edit-form-fields {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.edit-form-fields .field {
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+}
+
+.edit-form-fields .field label {
+  font-size: 12px;
+}
+
+.edit-form-fields .field input {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.edit-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-hint {
+  margin: 10px 0 0;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* Пустое сообщение */
+.empty-message {
+  text-align: center;
+  padding: 32px;
+  color: #94a3b8;
+  font-size: 14px;
+  background: #fafcff;
+  border-radius: 12px;
+  margin: 0;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-confirmed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-closed {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  
+  .card {
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+  }
+  
+  .card h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .form-grid .field:last-child {
+    grid-column: span 1;
+  }
+  
+  /* Tile-кнопки роли — в столбик на мобильной, выровнены по левому краю */
+  .radio-group {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .radio-tile {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+  
+  /* Адаптивные таблицы: каждая строка — карточка */
+  .users-table thead {
+    display: none;
+  }
+  
+  .users-table tr {
+    display: block;
+    margin-bottom: 12px;
+    border: 1px solid #eef2f6;
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: white;
+  }
+  
+  .users-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 12px;
+  }
+  
+  .users-table td:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  
+  .users-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+  
+  .actions-cell {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  
+  .actions-cell .btn-sm {
+    flex: 0 1 auto;
+    padding: 0 12px;
+    height: 36px;
+    font-size: 13px;
+  }
+  
+  /* Строка редактирования внутри карточки на мобильной */
+  .edit-row.is-open {
+    display: block;
+  }
+  
+  .edit-row td {
+    display: block;
+    padding: 12px 0 0;
+    border: none;
+  }
+  
+  .edit-row td::before {
+    content: none;
+  }
+  
+  .edit-form-fields {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .edit-form-fields .field {
+    min-width: 0;
+  }
+  
+  .edit-form-actions {
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  .info-text {
+    font-size: 12px;
+  }
+  
+  /* Форма создания пользователя — кнопка на всю ширину для удобного тапа */
+  .user-form > .btn {
+    width: 100%;
+    height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 20px;
+  }
+  
+  .card {
+    padding: 14px;
+  }
+  
+  .card h3 {
+    font-size: 15px;
+  }
+  
+  .field input {
+    font-size: 16px; /* предотвращает зум в iOS Safari при фокусе */
+    padding: 10px 12px;
+  }
+  
+  .users-table td {
+    font-size: 13px;
+    gap: 8px;
+  }
+  
+  .users-table td::before {
+    font-size: 11px;
+    min-width: 70px;
+  }
+  
+  .actions-cell {
+    justify-content: stretch;
+  }
+  
+  .actions-cell .btn-sm,
+  .actions-cell .inline-form {
+    flex: 1 1 auto;
+  }
+  
+  .actions-cell .inline-form .btn {
+    width: 100%;
+  }
+  
+  .badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+  
+  .self-label {
+    font-size: 12px;
+  }
+}
+</style>
+{% endblock %}

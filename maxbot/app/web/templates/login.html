@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}Вход — MAX-бот{% endblock %}
+{% block content %}
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor"/>
+        </svg>
+      </div>
+      <h2>Добро пожаловать</h2>
+      <p class="login-subtitle">Войдите в систему для управления мероприятиями</p>
+    </div>
+    
+    <form method="post" class="login-form">
+      <div class="input-group">
+        <label for="email">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/>
+          </svg>
+          Email
+        </label>
+        <input type="email" name="email" required autofocus placeholder="example@mirea.ru">
+      </div>
+      
+      <div class="input-group">
+        <label for="password">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="currentColor"/>
+          </svg>
+          Пароль
+        </label>
+        <input type="password" name="password" required placeholder="••••••">
+      </div>
+      
+      <button type="submit" class="login-btn">
+        Войти
+      </button>
+    </form>
+    
+    <div class="login-footer">
+      
+    </div>
+  </div>
+</div>
+
+<style>
+  .login-container {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .login-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+    border: 1px solid #eef2f6;
+    width: 100%;
+    max-width: 440px;
+    padding: 40px;
+    transition: all 0.2s ease;
+  }
+  
+  .login-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  }
+  
+  .login-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  .login-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b82f6;
+  }
+  
+  .login-header h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+  }
+  
+  .login-subtitle {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+  }
+  
+  .login-form {
+    margin-bottom: 24px;
+  }
+  
+  .input-group {
+    margin-bottom: 24px;
+  }
+  
+  .input-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 8px;
+  }
+  
+  .input-group label svg {
+    color: #94a3b8;
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    background: #ffffff;
+  }
+  
+  .input-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .input-group input::placeholder {
+    color: #cbd5e1;
+  }
+  
+  .login-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    height: 45px !important;
+    background: #2163F6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .login-btn:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+  }
+  
+  .login-btn:active {
+    transform: translateY(0);
+  }
+  
+  .login-footer {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+  }
+  
+  .login-footer p {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0;
+  }
+  
+  .login-footer code {
+    background: #f8fafc;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: #3b82f6;
+  }
+  
+  /* Анимация */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .login-card {
+    animation: fadeInUp 0.4s ease-out;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 640px) {
+    .login-card {
+      padding: 32px 24px;
+    }
+    
+    .login-header h2 {
+      font-size: 24px;
+    }
+    
+    .login-icon {
+      width: 56px;
+      height: 56px;
+    }
+    
+    .login-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+</style>
+{% endblock %}
