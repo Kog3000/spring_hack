@@ -1,0 +1,28 @@
+services:
+  app:
+    build: .
+    container_name: maxbot-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://maxbot:maxbot@db:5432/maxbot
+      PORT: 8080
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    container_name: maxbot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: maxbot
+      POSTGRES_PASSWORD: maxbot
+      POSTGRES_DB: maxbot
+    volumes:
+      - maxbot_pg_data:/var/lib/postgresql/data
+
+volumes:
+  maxbot_pg_data:
