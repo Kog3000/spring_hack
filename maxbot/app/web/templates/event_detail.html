@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ event.title }} — MAX-бот{% endblock %}
 {% block content %}
-<a href="{{ url_for('admin.dashboard') }}" style="color:#5f5e5a; font-size:13px;">← К списку</a>
+<a href="{{ url_for('admin.dashboard') }}" class="back-link">← К списку</a>
 <h2>{{ event.title }}</h2>
 <p style="color:#5f5e5a; margin-bottom: 32px;">{{ event.description }}</p>
 
@@ -201,6 +201,35 @@
 {% block head %}
 <style>
 /* ===== СУЩЕСТВУЮЩИЕ СТИЛИ (НЕ ИЗМЕНЕНЫ) ===== */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  transition: all 0.15s ease;
+}
+
+.back-link:hover {
+  background: #e2e8f0;
+  color: #2163F6;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .back-link {
+    font-size: 15px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+  }
+}
+
 .stats-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
