@@ -26,7 +26,7 @@
 {% else %}
   <div class="card">
     <div class="table-responsive">
-      <table class="events-table">
+      <table class="events-table no-mobile-cards">
         <thead>
           <tr>
             <th>Дата</th>
@@ -211,21 +211,34 @@
   .dashboard-header {
     flex-direction: column;
     align-items: stretch;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+    gap: 12px;
   }
   
   .dashboard-title {
-    font-size: 24px;
-    text-align: center;
+    font-size: 22px;
+    text-align: left;
   }
   
   .btn-success {
     justify-content: center;
     width: 100%;
+    height: 44px;
   }
   
   .card {
     border-radius: 12px;
+    padding: 12px;
+  }
+  
+  /* Снимаем min-width — иначе таблица скроллится горизонтально
+     и значения уплывают за границу экрана */
+  .events-table {
+    min-width: 0;
+  }
+  
+  .table-responsive {
+    overflow-x: visible;
   }
   
   /* Мобильная таблица - карточки */
@@ -243,55 +256,68 @@
   }
   
   .events-table tr {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     border: 1px solid #eef2f6;
     border-radius: 12px;
     background: white;
-    padding: 12px;
+    padding: 12px 14px;
+  }
+  
+  .events-table tr:last-child {
+    margin-bottom: 0;
   }
   
   .events-table td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 8px 0;
     border: none;
     border-bottom: 1px solid #f1f5f9;
-    gap: 16px;
+    gap: 12px;
+    text-align: right;
+    min-width: 0;
   }
   
   .events-table td:last-child {
     border-bottom: none;
-    padding-bottom: 0;
+    padding: 12px 0 0;
+    justify-content: stretch;
   }
   
   .events-table td::before {
     content: attr(data-label);
     font-weight: 600;
     color: #64748b;
-    font-size: 12px;
-    min-width: 80px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+  
+  .events-table td:last-child::before {
+    display: none;
   }
   
   .btn,
   .btn-scan {
     width: 100%;
     justify-content: center;
+    height: 40px;
   }
 }
 
 @media (max-width: 480px) {
   .dashboard-title {
-    font-size: 20px;
-  }
-  
-  .events-table td::before {
-    min-width: 70px;
-    font-size: 11px;
+    font-size: 19px;
   }
   
   .events-table td {
     font-size: 13px;
+  }
+  
+  .events-table td::before {
+    font-size: 10px;
   }
 }
 </style>

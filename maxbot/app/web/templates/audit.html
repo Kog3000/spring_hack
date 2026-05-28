@@ -6,7 +6,7 @@
 
 <div class="card">
   <div class="table-wrapper">
-    <table class="audit-table">
+    <table class="audit-table no-mobile-cards">
       <thead>
         <tr>
           <th>Время</th>
@@ -156,35 +156,63 @@ h2 {
 /* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
 @media (max-width: 768px) {
   h2 {
-    font-size: 24px;
+    font-size: 22px;
   }
   
   .audit-description {
     font-size: 13px;
+    margin-bottom: 16px;
   }
   
-  /* Адаптивные карточки для мобильных */
+  .card {
+    border-radius: 12px;
+    padding: 10px;
+  }
+  
+  /* Сбрасываем min-width, иначе таблица скроллится горизонтально
+     и значения уплывают за экран */
+  .audit-table {
+    min-width: 0;
+  }
+  
+  .table-wrapper {
+    overflow-x: visible;
+  }
+  
+  .audit-table,
+  .audit-table thead,
+  .audit-table tbody,
+  .audit-table tr,
+  .audit-table th,
+  .audit-table td {
+    display: block;
+  }
+  
   .audit-table thead {
     display: none;
   }
   
   .audit-table tr {
-    display: block;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     border: 1px solid #eef2f6;
     border-radius: 12px;
-    padding: 12px;
+    padding: 12px 14px;
     background: white;
+  }
+  
+  .audit-table tr:last-child {
+    margin-bottom: 0;
   }
   
   .audit-table td {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 10px 0;
+    padding: 8px 0;
     border: none;
     border-bottom: 1px solid #f1f5f9;
-    gap: 16px;
+    gap: 12px;
+    min-width: 0;
   }
   
   .audit-table td:last-child {
@@ -199,17 +227,22 @@ h2 {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    min-width: 100px;
     flex-shrink: 0;
+    white-space: nowrap;
   }
   
   .payload-cell {
     max-width: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
   }
   
   .payload {
     word-break: break-word;
     white-space: normal;
+    width: 100%;
+    font-size: 11px;
   }
   
   .action-code {
@@ -218,6 +251,8 @@ h2 {
   
   .mono {
     font-size: 11px;
+    text-align: right;
+    word-break: break-all;
   }
 }
 
@@ -226,14 +261,17 @@ h2 {
     font-size: 20px;
   }
   
+  .audit-table tr {
+    padding: 10px 12px;
+  }
+  
   .audit-table td::before {
-    min-width: 80px;
     font-size: 10px;
   }
   
   .audit-table td {
     font-size: 12px;
-    gap: 12px;
+    gap: 8px;
   }
   
   .action-code {

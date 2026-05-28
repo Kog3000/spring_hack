@@ -2,15 +2,97 @@
 {% block title %}QR-сканер — {{ event.title }}{% endblock %}
 {% block head %}
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  .scan-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    transition: all 0.15s ease;
+  }
+  
+  .scan-back:hover {
+    background: #e2e8f0;
+    color: #2163F6;
+    text-decoration: none;
+  }
+  
+  .scan-subtitle {
+    color: #5f5e5a;
+    margin: 0 0 16px;
+  }
+  
+  .scan-card {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  
+  #reader {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  #result {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 12px;
+    display: none;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  #result code {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  
+  @media (max-width: 768px) {
+    .scan-back {
+      font-size: 15px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+    }
+    
+    h2 {
+      font-size: 22px;
+      margin: 12px 0 6px;
+    }
+    
+    .scan-subtitle {
+      font-size: 13px;
+    }
+    
+    .scan-card {
+      max-width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+    }
+    
+    #result {
+      font-size: 13px;
+      padding: 14px;
+    }
+  }
+</style>
 {% endblock %}
 {% block content %}
-<a href="{{ url_for('admin.event_detail', event_id=event.id) }}" style="color:#5f5e5a;font-size:13px;">← К карточке</a>
+<a href="{{ url_for('admin.event_detail', event_id=event.id) }}" class="scan-back">← К карточке</a>
 <h2>QR-сканер</h2>
-<p style="color:#5f5e5a;">{{ event.title }}</p>
+<p class="scan-subtitle">{{ event.title }}</p>
 
-<div class="card" style="max-width:520px;">
-  <div id="reader" style="width:100%;"></div>
-  <div id="result" style="margin-top:16px; padding:16px; border-radius:8px; display:none;"></div>
+<div class="card scan-card">
+  <div id="reader"></div>
+  <div id="result"></div>
 </div>
 
 <script>
@@ -60,7 +142,7 @@ scanner.start(
   (errorMessage) => {/* игнорируем */}
 ).catch(err => {
   document.getElementById('reader').innerHTML =
-    '<p style="color:#7c1f1f;">Не удалось получить доступ к камере. Разрешите доступ в браузере.</p>';
+    '<p style="color:#7c1f1f;padding:16px;">Не удалось получить доступ к камере. Разрешите доступ в браузере.</p>';
 });
 </script>
 {% endblock %}

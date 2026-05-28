@@ -4,9 +4,9 @@
 {% endblock %}
 {% block content %}
 {% if mode == 'edit' %}
-  <a href="{{ url_for('admin.event_detail', event_id=event.id) }}" style="color:#5f5e5a;font-size:13px;">← К карточке</a>
+  <a href="{{ url_for('admin.event_detail', event_id=event.id) }}" class="back-link">← К карточке</a>
 {% else %}
-  <a href="{{ url_for('admin.dashboard') }}" style="color:#5f5e5a;font-size:13px;">← К списку</a>
+  <a href="{{ url_for('admin.dashboard') }}" class="back-link">← К списку</a>
 {% endif %}
 <h2>{% if mode == 'new' %}Новое мероприятие{% else %}Редактирование мероприятия{% endif %}</h2>
 
@@ -213,17 +213,34 @@ h2 {
 
 }
 
-/* Ссылки назад */
-a[style*="color:#5f5e5a"] {
+/* Кнопка-ссылка «Назад» — крупная и удобная для тапа */
+.back-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  transition: color 0.2s ease;
+  gap: 6px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  transition: all 0.15s ease;
 }
 
-a[style*="color:#5f5e5a"]:hover {
-  color: #3b82f6 !important;
+.back-link:hover {
+  background: #e2e8f0;
+  color: #2163F6;
   text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .back-link {
+    font-size: 15px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+  }
 }
 
 /* Адаптивность - на мобильных колонки становятся вертикальными */
@@ -231,31 +248,44 @@ a[style*="color:#5f5e5a"]:hover {
   .two-columns {
     flex-direction: column;
     gap: 0;
+    margin-bottom: 20px;
   }
   
   .card {
-    padding: 20px;
+    padding: 16px;
+    border-radius: 12px;
   }
   
   h2 {
-    font-size: 24px;
+    font-size: 22px;
+    margin-bottom: 16px;
+    margin-top: 8px;
   }
   
-  .btn {
-    padding: 10px 20px;
-    height: 36px;
-    font-size: 13px;
+  .field {
+    margin-bottom: 18px;
   }
   
   .field input,
   .field select,
   .field textarea {
-    padding: 10px 12px;
-    font-size: 13px;
+    padding: 11px 13px;
+    font-size: 16px; /* отключает зум iOS Safari */
+  }
+  
+  .field textarea {
+    min-height: 100px;
+  }
+  
+  .btn {
+    height: 44px;
+    font-size: 14px;
+    padding: 0 18px;
   }
 }
 
 @media (max-width: 640px) {
+  /* Внутренняя 2-колоночная строка дата/длительность — в столбик */
   div[style*="display:flex; gap:16px"] {
     flex-direction: column;
     gap: 0;
@@ -263,10 +293,21 @@ a[style*="color:#5f5e5a"]:hover {
   
   .form-buttons {
     flex-direction: column;
+    gap: 10px;
   }
   
   .btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 20px;
+  }
+  
+  .card {
+    padding: 14px;
   }
 }
 </style>

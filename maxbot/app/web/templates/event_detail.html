@@ -79,7 +79,7 @@
   {% if controllers %}
     <h4 class="controllers-count">Назначены ({{ controllers|length }})</h4>
     <div class="controllers-table-wrapper">
-      <table class="controllers-table">
+      <table class="controllers-table no-mobile-cards">
         <thead>
           <tr>
             <th>ФИО</th>
@@ -126,7 +126,7 @@
       <select name="type">
         <option value="info">Информация</option>
         <option value="reschedule">Перенос времени</option>
-        <option value="location">Изменение аудитории/ссылки</option>
+        <option value="location">Изменение места</option>
         <option value="reminder_24h">Напоминание за сутки</option>
         <option value="reminder_1h">Напоминание за час</option>
       </select>
@@ -141,7 +141,7 @@
   {% if notifs %}
     <h4 style="margin-top:24px;">История рассылок</h4>
     <div class="notifications-table-wrapper">
-      <table>
+      <table class="no-mobile-cards">
         <thead><tr><th>Когда</th><th>Тип</th><th>Текст</th><th>Доставлено</th><th>Ошибок</th></tr></thead>
         <tbody>
           {% for n in notifs %}
@@ -165,7 +165,7 @@
   {% if not regs %}
     <p>Пока никто не записался.</p>
   {% else %}
-  <table>
+  <table class="participants-table">
     <thead>
       <tr>
         <th>Код</th>
@@ -178,16 +178,16 @@
     <tbody>
       {% for r in regs %}
         <tr>
-          <td><code>{{ r.code }}</code></td>
-          <td>{{ r.username }}</td>
-          <td>
+          <td data-label="Код"><code>{{ r.code }}</code></td>
+          <td data-label="Имя профиля">{{ r.username }}</td>
+          <td data-label="Статус">
             {% if r.status == 'confirmed' %}<span class="badge badge-confirmed">Подтверждена</span>
             {% elif r.status == 'cancelled' %}<span class="badge badge-cancelled">Отменена</span>
             {% elif r.status == 'attended' %}<span class="badge badge-attended">Пришёл</span>
             {% endif %}
           </td>
-          <td>{{ r.created_at.strftime('%d.%m %H:%M') }}</td>
-          <td>{% if r.attended_at %}{{ r.attended_at.strftime('%d.%m %H:%M') }}{% endif %}</td>
+          <td data-label="Записан">{{ r.created_at.strftime('%d.%m %H:%M') }}</td>
+          <td data-label="Пришёл">{% if r.attended_at %}{{ r.attended_at.strftime('%d.%m %H:%M') }}{% endif %}</td>
         </tr>
       {% endfor %}
     </tbody>
@@ -567,7 +567,7 @@ a[style*="color:#5f5e5a"]:hover {
   margin: 0;
 }
 
-/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ (ТОЛЬКО ДЛЯ КОНТРОЛЁРОВ И УВЕДОМЛЕНИЙ) ===== */
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
 @media (max-width: 1024px) {
   .stats-row {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -575,14 +575,34 @@ a[style*="color:#5f5e5a"]:hover {
 }
 
 @media (max-width: 768px) {
+  h2 {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  
   .stats-row {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .stat {
+    padding: 12px;
+  }
+  
+  .stat .label {
+    font-size: 11px;
+  }
+  
+  .stat .value {
+    font-size: 16px;
+    word-break: break-word;
   }
   
   .actions-group {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
   }
   
   .actions-group .btn,
@@ -592,13 +612,25 @@ a[style*="color:#5f5e5a"]:hover {
   
   .actions-group .btn {
     justify-content: center;
+    height: 44px;
   }
   
   .card {
     padding: 16px;
+    border-radius: 12px;
   }
   
-  /* Форма загрузки - вертикально на мобильных */
+  .card h3 {
+    font-size: 17px;
+  }
+  
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px; /* отключает зум iOS Safari */
+  }
+  
+  /* Форма загрузки контролёров — вертикально */
   .upload-form-inline {
     flex-direction: column;
     align-items: stretch;
@@ -611,9 +643,35 @@ a[style*="color:#5f5e5a"]:hover {
   
   .upload-form-inline .btn {
     width: 100%;
+    height: 44px;
   }
   
-  /* Адаптация таблиц контролёров и уведомлений (НЕ УЧАСТНИКОВ) */
+  /* Адаптация controllers-table и notifications-table — карточки */
+  .controllers-table,
+  .notifications-table-wrapper table {
+    min-width: 0;
+  }
+  
+  .controllers-table-wrapper,
+  .notifications-table-wrapper {
+    overflow-x: visible;
+  }
+  
+  .controllers-table,
+  .controllers-table thead,
+  .controllers-table tbody,
+  .controllers-table tr,
+  .controllers-table th,
+  .controllers-table td,
+  .notifications-table-wrapper table,
+  .notifications-table-wrapper table thead,
+  .notifications-table-wrapper table tbody,
+  .notifications-table-wrapper table tr,
+  .notifications-table-wrapper table th,
+  .notifications-table-wrapper table td {
+    display: block;
+  }
+  
   .controllers-table thead,
   .notifications-table-wrapper table thead {
     display: none;
@@ -621,11 +679,10 @@ a[style*="color:#5f5e5a"]:hover {
   
   .controllers-table tr,
   .notifications-table-wrapper table tr {
-    display: block;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     border: 1px solid #eef2f6;
     border-radius: 12px;
-    padding: 12px;
+    padding: 12px 14px;
     background: white;
   }
   
@@ -634,10 +691,11 @@ a[style*="color:#5f5e5a"]:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 8px 0;
     border: none;
     border-bottom: 1px solid #f1f5f9;
-    gap: 16px;
+    gap: 12px;
+    min-width: 0;
   }
   
   .controllers-table td:last-child,
@@ -651,36 +709,62 @@ a[style*="color:#5f5e5a"]:hover {
     content: attr(data-label);
     font-weight: 600;
     color: #64748b;
-    font-size: 12px;
-    min-width: 100px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
   }
   
-  /* Выравнивание действия по левому краю на мобильных */
+  /* Выравнивание действия по правому краю на мобильных */
   .controllers-table td.action-column {
-    text-align: left;
-    justify-content: flex-start;
+    justify-content: space-between;
   }
   
   .btn-sm {
     width: auto;
-    min-width: 100px;
+    min-width: 0;
+    padding: 0 14px;
+    height: 36px;
   }
   
   .btn, .btn-secondary, .btn-success, .btn-danger {
     width: 100%;
     justify-content: center;
   }
+  
+  /* Внутри строки-карточки — кнопка не на всю ширину */
+  .controllers-table .btn-sm,
+  .notifications-table-wrapper .btn-sm {
+    width: auto;
+  }
+  
+  /* Таблица участников использует базовые мобильные стили из base.html */
+  .participants-table code {
+    font-size: 11px;
+  }
 }
 
 @media (max-width: 480px) {
+  h2 {
+    font-size: 20px;
+  }
+  
   .stats-row {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .card {
+    padding: 14px;
+  }
+  
+  .card h3 {
+    font-size: 16px;
   }
   
   .controllers-table td::before,
   .notifications-table-wrapper table td::before {
-    min-width: 80px;
-    font-size: 11px;
+    font-size: 10px;
   }
   
   .controllers-table td,
@@ -688,8 +772,9 @@ a[style*="color:#5f5e5a"]:hover {
     font-size: 13px;
   }
   
-  .card h3 {
-    font-size: 16px;
+  .actions-group .btn {
+    height: 42px;
+    font-size: 13px;
   }
 }
 </style>

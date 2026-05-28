@@ -12,6 +12,11 @@
     box-sizing: border-box;
   }
   
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background: #f8fafc;
@@ -65,10 +70,36 @@
     color: #3b82f6;
   }
   
-  header nav span {
+  header nav span.user-info {
     color: #94a3b8;
     font-size: 13px;
     margin-right: 8px;
+  }
+  
+  /* Гамбургер-кнопка — скрыта на десктопе */
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: auto;
+    color: #475569;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+  }
+  
+  .nav-toggle:hover {
+    background: #f1f5f9;
+  }
+  
+  .nav-toggle svg {
+    width: 24px;
+    height: 24px;
   }
   
   /* ОСНОВНОЙ КОНТЕЙНЕР */
@@ -219,6 +250,7 @@
   
   input, select, textarea {
     width: 100%;
+    max-width: 100%;
     padding: 10px 12px;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -226,6 +258,17 @@
     font-family: inherit;
     transition: all 0.2s ease;
     background: #ffffff;
+  }
+  
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    text-overflow: ellipsis;
   }
   
   input:focus, select:focus, textarea:focus {
@@ -381,23 +424,77 @@
     animation: fadeIn 0.3s ease-out;
   }
   
-  /* АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ */
+  /* АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ И МОБИЛЬНЫХ */
   @media (max-width: 768px) {
     header {
       padding: 0 16px;
+      height: 56px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    
+    header h1 {
+      font-size: 15px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .nav-toggle {
+      display: inline-flex;
     }
     
     header nav {
-      gap: 12px;
+      display: none;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      width: 100%;
+      order: 3;
+      flex-basis: 100%;
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      padding: 8px 0;
+      margin: 0 -16px -1px;
+      padding: 8px 16px;
+    }
+    
+    header nav.is-open {
+      display: flex;
+    }
+    
+    header nav a,
+    header nav span.user-info {
+      padding: 12px 4px;
+      margin: 0;
+      font-size: 15px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    
+    header nav a:last-child,
+    header nav span.user-info:last-child {
+      border-bottom: none;
+    }
+    
+    header nav span.user-info {
+      color: #64748b;
+      font-weight: 500;
     }
     
     main {
-      padding: 0 16px;
-      margin: 20px auto;
+      padding: 0 14px;
+      margin: 16px auto;
     }
     
     h2 {
-      font-size: 24px;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    
+    h3 {
+      font-size: 16px;
     }
     
     .grid {
@@ -407,49 +504,107 @@
     
     .card {
       padding: 16px;
+      margin-bottom: 16px;
+      border-radius: 12px;
     }
     
-    /* Адаптивные таблицы */
-    table, thead, tbody, th, td, tr {
+    .stat {
+      padding: 14px;
+    }
+    
+    .stat .value {
+      font-size: 24px;
+    }
+    
+    /* Адаптивные таблицы — карточки с подписями.
+       Срабатывает только для таблиц БЕЗ собственной адаптации. */
+    table:not(.no-mobile-cards),
+    table:not(.no-mobile-cards) thead,
+    table:not(.no-mobile-cards) tbody,
+    table:not(.no-mobile-cards) th,
+    table:not(.no-mobile-cards) td,
+    table:not(.no-mobile-cards) tr {
       display: block;
     }
     
-    thead {
+    table:not(.no-mobile-cards) thead {
       display: none;
     }
     
-    tr {
-      margin-bottom: 16px;
+    table:not(.no-mobile-cards) tr {
+      margin-bottom: 12px;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
-      padding: 12px;
+      padding: 12px 14px;
       background: white;
     }
     
-    td {
+    table:not(.no-mobile-cards) td {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 8px 0;
       border: none;
       border-bottom: 1px solid #f1f5f9;
+      gap: 12px;
+      min-width: 0;
     }
     
-    td:last-child {
+    table:not(.no-mobile-cards) td:last-child {
       border-bottom: none;
+      padding-bottom: 0;
     }
     
-    td::before {
+    table:not(.no-mobile-cards) td::before {
       content: attr(data-label);
       font-weight: 600;
       color: #64748b;
-      margin-right: 16px;
       font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      flex-shrink: 0;
     }
     
     .btn {
-      padding: 6px 12px;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    
+    .flash {
+      padding: 12px 14px;
+      font-size: 13px;
+    }
+    
+    footer {
+      padding: 20px 16px;
       font-size: 12px;
+      margin-top: 32px;
+    }
+    
+    input, select, textarea {
+      font-size: 16px; /* предотвращает зум iOS Safari при фокусе */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    header h1 {
+      font-size: 14px;
+    }
+    
+    main {
+      padding: 0 12px;
+    }
+    
+    h2 {
+      font-size: 20px;
+    }
+    
+    .card {
+      padding: 14px;
+    }
+    
+    .stat .value {
+      font-size: 22px;
     }
   }
   
@@ -477,9 +632,18 @@
 <body>
 <header>
   <h1>MAX-бот · Запись на мероприятие</h1>
+  {% if session.uid %}
+    <button class="nav-toggle" type="button" onclick="document.querySelector('header nav').classList.toggle('is-open')" aria-label="Меню">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  {% endif %}
   <nav>
     {% if session.uid %}
-      <span style="color:#b8b8d0;font-size:13px;">{{ session.name }} ({{ session.role }})</span>
+      <span class="user-info">{{ session.name }} ({{ session.role }})</span>
       <a href="{{ url_for('admin.dashboard') }}">Мероприятия</a>
       {% if session.role == 'admin' %}
         <a href="{{ url_for('admin.users_management') }}">Пользователи</a>

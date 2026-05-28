@@ -114,7 +114,7 @@
     <p class="empty-message">Пока нет организаторов.</p>
   {% else %}
     <div class="table-wrapper">
-      <table class="users-table">
+      <table class="users-table no-mobile-cards">
         <thead>
           <tr><th>ФИО</th><th>Email</th><th>Статус</th><th>Действия</th></tr>
         </thead>
@@ -134,7 +134,7 @@
     <p class="empty-message">Пока нет контролёров.</p>
   {% else %}
     <div class="table-wrapper">
-      <table class="users-table">
+      <table class="users-table no-mobile-cards">
         <thead>
           <tr><th>ФИО</th><th>Email</th><th>Статус</th><th>Действия</th></tr>
         </thead>
@@ -154,7 +154,7 @@
     <p class="empty-message">Нет техадминов.</p>
   {% else %}
     <div class="table-wrapper">
-      <table class="users-table">
+      <table class="users-table no-mobile-cards">
         <thead>
           <tr><th>Имя</th><th>Email</th><th>Статус</th><th>Действия</th></tr>
         </thead>
@@ -349,7 +349,8 @@ h2 {
 
 .btn:hover {
   transform: translateY(-1px);
-  background: #1e293b;
+  background: #2163F6;
+  color: white;
 }
 
 .btn-sm {
@@ -557,12 +558,13 @@ h2 {
     font-size: 15px;
   }
   
-  /* Адаптивные таблицы: каждая строка — карточка */
+  /* Адаптивные таблицы: каждая строка — карточка.
+     :not(.edit-row) — чтобы скрытая edit-строка не превращалась в карточку */
   .users-table thead {
     display: none;
   }
   
-  .users-table tr {
+  .users-table tr:not(.edit-row) {
     display: block;
     margin-bottom: 12px;
     border: 1px solid #eef2f6;
@@ -571,7 +573,7 @@ h2 {
     background: white;
   }
   
-  .users-table td {
+  .users-table tr:not(.edit-row) td {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -581,12 +583,12 @@ h2 {
     gap: 12px;
   }
   
-  .users-table td:last-child {
+  .users-table tr:not(.edit-row) td:last-child {
     border-bottom: none;
     padding-bottom: 0;
   }
   
-  .users-table td::before {
+  .users-table tr:not(.edit-row) td::before {
     content: attr(data-label);
     font-weight: 600;
     color: #64748b;
