@@ -173,6 +173,9 @@ maxbot/
 git clone <repo>
 cd spring_hack/maxbot
 py -3.12 -m venv .venv
+#apt install pythonpy
+#python3 -m venv .venv           #Linux
+
 .\.venv\Scripts\Activate.ps1          # Windows
 # source .venv/bin/activate            # macOS/Linux
 pip install -r requirements.txt
@@ -222,7 +225,7 @@ docker run -d --name maxbot-pg \
   -e POSTGRES_PASSWORD=maxbot \
   -e POSTGRES_DB=maxbot \
   -p 5432:5432 \
-  postgres:16
+  postgres:17
 ```
 
 Или установить локально и создать БД:
