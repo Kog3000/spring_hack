@@ -113,7 +113,7 @@
 
 | Слой | Технология |
 |---|---|
-| Язык | Python 3.12 |
+| Язык | Python 3.14 |
 | Веб-фреймворк | Flask 3.0 |
 | ORM | SQLAlchemy 2.0 (с типизацией Mapped/mapped_column) |
 | БД | PostgreSQL 14+ |
@@ -158,7 +158,7 @@ maxbot/
 │   └── register_webhook.py  # Зарегистрировать webhook в MAX
 ├── requirements.txt
 ├── Procfile                 # Для Railway/Heroku
-├── runtime.txt              # python-3.12.x
+├── runtime.txt              # python-3.14.x
 ├── .env.example
 └── README.md
 ```
@@ -172,7 +172,7 @@ maxbot/
 ```bash
 git clone <repo>
 cd spring_hack/maxbot
-py -3.12 -m venv .venv
+py -3.14 -m venv .venv
 #apt install pythonpy
 #python3 -m venv .venv           #Linux
 
@@ -195,12 +195,12 @@ python -m app.main
 
 ### 1. Python и виртуальное окружение
 
-Нужен Python 3.12 с [python.org](https://www.python.org/downloads/windows/) (не Microsoft Store).
+Нужен Python 3.14 с [python.org](https://www.python.org/downloads/windows/) (не Microsoft Store).
 
-> ⚠️ На Windows проверьте, какой `python` подхватился: `where.exe python`. Если первым идёт MSYS2 (`C:\msys64\...`), используйте `py -3.12` вместо `python` для создания venv — иначе venv создастся в Unix-стиле и не будет работать.
+> ⚠️ На Windows проверьте, какой `python` подхватился: `where.exe python`. Если первым идёт MSYS2 (`C:\msys64\...`), используйте `py -3.14` вместо `python` для создания venv — иначе venv создастся в Unix-стиле и не будет работать.
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.14 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
