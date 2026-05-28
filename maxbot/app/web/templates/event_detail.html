@@ -1,198 +1,212 @@
 {% extends "base.html" %}
 {% block title %}{{ event.title }} — MAX-бот{% endblock %}
 {% block content %}
-<a href="{{ url_for('admin.dashboard') }}" class="back-link">← К списку</a>
+<a href="{{ url_for('admin.dashboard') }}" style="color:#5f5e5a; font-size:13px;">← К списку</a>
 <h2>{{ event.title }}</h2>
 <p style="color:#5f5e5a; margin-bottom: 32px;">{{ event.description }}</p>
 
 <div class="stats-row">
-  <div class="stat">
-    <div class="label">Дата</div>
-    <div class="value">{{ event.date.strftime('%d.%m.%Y %H:%M') }}</div>
-  </div>
-  {% if role != 'controller' %}
-  <div class="stat">
-    <div class="label">Записано</div>
-    <div class="value">{{ event.taken }} / {{ event.max }}</div>
-  </div>
-  <div class="stat">
-    <div class="label">Пришли</div>
-    <div class="value">{{ event.attended }}</div>
-  </div>
-  {% endif %}
-  <div class="stat">
-    <div class="label">Формат</div>
-    <div class="value">{{ event.format }}</div>
-  </div>
-  <div class="stat">
-    <div class="label">Место</div>
-    <div class="value">{{ event.location }}</div>
-  </div>
+    <div class="stat">
+        <div class="label">Дата</div>
+        <div class="value">{{ event.date.strftime('%d.%m.%Y %H:%M') }}</div>
+    </div>
+    {% if role != 'controller' %}
+    <div class="stat">
+        <div class="label">Записано</div>
+        <div class="value">{{ event.taken }} / {{ event.max }}</div>
+    </div>
+    <div class="stat">
+        <div class="label">Пришли</div>
+        <div class="value">{{ event.attended }}</div>
+    </div>
+    {% endif %}
+    <div class="stat">
+        <div class="label">Формат</div>
+        <div class="value">{{ event.format }}</div>
+    </div>
+    <div class="stat">
+        <div class="label">Место</div>
+        <div class="value">{{ event.location }}</div>
+    </div>
 </div>
 
 <div class="card">
-  <h3>Действия</h3>
-  <div class="actions-group">
-    <a class="btn" href="{{ url_for('admin.event_scan', event_id=event.id) }}">QR-сканер</a>
-    {% if role != 'controller' %}
-      <a class="btn btn-secondary" href="{{ url_for('admin.event_edit', event_id=event.id) }}">Редактировать</a>
-      <a class="btn btn-secondary" href="{{ url_for('admin.event_export', event_id=event.id) }}">Выгрузка XLSX</a>
-      {% if event.closed %}
+    <h3>Действия</h3>
+    <div class="actions-group">
+        <a class="btn" href="{{ url_for('admin.event_scan', event_id=event.id) }}">QR-сканер</a>
+        {% if role != 'controller' %}
+        <a class="btn btn-secondary" href="{{ url_for('admin.event_edit', event_id=event.id) }}">Редактировать</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin.event_export', event_id=event.id) }}">Выгрузка XLSX</a>
+        {% if event.closed %}
         <form method="post" action="{{ url_for('admin.event_open', event_id=event.id) }}" style="display:inline;">
-          <button class="btn btn-success" type="submit">Открыть регистрацию</button>
+            <button class="btn btn-success" type="submit">Открыть регистрацию</button>
         </form>
-      {% else %}
+        {% else %}
         <form method="post" action="{{ url_for('admin.event_close', event_id=event.id) }}" style="display:inline;">
-          <button class="btn btn-danger" type="submit" onclick="return confirm('Закрыть регистрацию?');">Закрыть регистрацию</button>
+            <button class="btn btn-danger" type="submit" onclick="return confirm('Закрыть регистрацию?');">Закрыть
+                регистрацию
+            </button>
         </form>
-      {% endif %}
-      {% if event.taken == 0 %}
+        {% endif %}
+        {% if event.taken == 0 %}
         <form method="post" action="{{ url_for('admin.event_delete', event_id=event.id) }}" style="display:inline;">
-          <button class="btn btn-danger" type="submit" onclick="return confirm('Удалить мероприятие? Действие необратимо.');">Удалить</button>
+            <button class="btn btn-danger" type="submit"
+                    onclick="return confirm('Удалить мероприятие? Действие необратимо.');">Удалить
+            </button>
         </form>
-      {% endif %}
-    {% endif %}
-  </div>
+        {% endif %}
+        {% endif %}
+    </div>
 </div>
 
 {% if role != 'controller' %}
 
-{% if role == 'organizer' %}
+{% if role == 'organizer' or role == 'admin' %}
 
 <div class="card">
-  <h3>Контролёры мероприятия</h3>
-  <p class="controllers-info">
-    Контролёры могут только сканировать QR на входе этого мероприятия.
-    Учётки контролёров создаёт техадмин в разделе «Пользователи».
-    Загрузите XLSX-файл со столбцами <code>email</code>, <code>full_name</code> — система найдёт каждого по email и привяжет к мероприятию.
-  </p>
-  
-  <form method="post" action="{{ url_for('admin.event_controllers_upload', event_id=event.id) }}"
-        enctype="multipart/form-data" class="upload-form-inline">
-    <div class="file-field">
-      <input type="file" name="file" accept=".xlsx" required id="file-input">
-      <label for="file-input" class="file-input-label">Выберите файл XLSX</label>
-    </div>
-    <button class="btn" type="submit">Загрузить список</button>
-  </form>
+    <h3>Контролёры мероприятия</h3>
+    <p class="controllers-info">
+        Контролёры могут только сканировать QR на входе этого мероприятия.
+        Учётки контролёров создаёт техадмин в разделе «Пользователи».
+        Загрузите XLSX-файл со столбцами <code>email</code>, <code>full_name</code> — система найдёт каждого по email и
+        привяжет к мероприятию.
+    </p>
 
-  {% if controllers %}
+    <form method="post" action="{{ url_for('admin.event_controllers_upload', event_id=event.id) }}"
+          enctype="multipart/form-data" class="upload-form-inline">
+        <div class="file-field">
+            <input type="file" name="file" accept=".xlsx" required id="file-input">
+            <label for="file-input" class="file-input-label">Выберите файл XLSX</label>
+        </div>
+        <button class="btn" type="submit">Загрузить список</button>
+    </form>
+
+    {% if controllers %}
     <h4 class="controllers-count">Назначены ({{ controllers|length }})</h4>
     <div class="controllers-table-wrapper">
-      <table class="controllers-table no-mobile-cards">
-        <thead>
-          <tr>
-            <th>ФИО</th>
-            <th>Email</th>
-            <th>Статус</th>
-            <th class="action-column"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in controllers %}
+        <table class="controllers-table no-mobile-cards">
+            <thead>
             <tr>
-              <td data-label="ФИО">{{ c.full_name }}</td>
-              <td data-label="Email">{{ c.email }}</td>
-              <td data-label="Статус">
-                {% if c.is_active %}<span class="badge badge-confirmed">Активен</span>
-                {% else %}<span class="badge badge-closed">Отключён</span>
-                {% endif %}
-              </td>
-              <td data-label="Действие" class="action-column">
-                <form method="post"
-                      action="{{ url_for('admin.event_controllers_revoke', event_id=event.id, controller_id=c.id) }}"
-                      class="inline-form">
-                  <button class="btn btn-danger btn-sm" type="submit"
-                          onclick="return confirm('Отозвать доступ?');">Отозвать</button>
-                </form>
-              </td>
-            </table>
-          {% endfor %}
-        </tbody>
-      </table>
+                <th>ФИО</th>
+                <th>Email</th>
+                <th>Статус</th>
+                <th class="action-column"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for c in controllers %}
+            <tr>
+                <td data-label="ФИО">{{ c.full_name }}</td>
+                <td data-label="Email">{{ c.email }}</td>
+                <td data-label="Статус">
+                    {% if c.is_active %}<span class="badge badge-confirmed">Активен</span>
+                    {% else %}<span class="badge badge-closed">Отключён</span>
+                    {% endif %}
+                </td>
+                <td data-label="Действие" class="action-column">
+                    <form method="post"
+                          action="{{ url_for('admin.event_controllers_revoke', event_id=event.id, controller_id=c.id) }}"
+                          class="inline-form">
+                        <button class="btn btn-danger btn-sm" type="submit"
+                                onclick="return confirm('Отозвать доступ?');">Отозвать
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
-  {% else %}
+    {% else %}
     <p class="empty-message">Пока никто не назначен.</p>
-  {% endif %}
+    {% endif %}
 </div>
 
-{% endif %}{# role == organizer #}
+{% endif %}{# role == organizer or admin #}
 
 <div class="card">
-  <h3>Push-уведомление участникам</h3>
-  <form method="post" action="{{ url_for('admin.event_notify', event_id=event.id) }}">
-    <div class="field">
-      <label>Тип</label>
-      <select name="type">
-        <option value="info">Информация</option>
-        <option value="reschedule">Перенос времени</option>
-        <option value="location">Изменение места</option>
-        <option value="reminder_24h">Напоминание за сутки</option>
-        <option value="reminder_1h">Напоминание за час</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Текст (отправится всем подписанным участникам)</label>
-      <textarea name="body" rows="3" required></textarea>
-    </div>
-    <button class="btn" type="submit">Отправить</button>
-  </form>
+    <h3>Push-уведомление участникам</h3>
+    <form method="post" action="{{ url_for('admin.event_notify', event_id=event.id) }}">
+        <div class="field">
+            <label>Тип</label>
+            <select name="type">
+                <option value="info">Информация</option>
+                <option value="reschedule">Перенос времени</option>
+                <option value="location">Изменение места</option>
+                <option value="reminder_24h">Напоминание за сутки</option>
+                <option value="reminder_1h">Напоминание за час</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Текст (отправится всем подписанным участникам)</label>
+            <textarea name="body" rows="3" required></textarea>
+        </div>
+        <button class="btn" type="submit">Отправить</button>
+    </form>
 
-  {% if notifs %}
+    {% if notifs %}
     <h4 style="margin-top:24px;">История рассылок</h4>
     <div class="notifications-table-wrapper">
-      <table class="no-mobile-cards">
-        <thead><tr><th>Когда</th><th>Тип</th><th>Текст</th><th>Доставлено</th><th>Ошибок</th></tr></thead>
-        <tbody>
-          {% for n in notifs %}
+        <table class="no-mobile-cards">
+            <thead>
             <tr>
-              <td data-label="Когда">{{ n.sent_at.strftime('%d.%m %H:%M') }}</td>
-              <td data-label="Тип">{{ n.type }}</td>
-              <td data-label="Текст">{{ n.body[:80] }}{% if n.body|length > 80 %}…{% endif %}</td>
-              <td data-label="Доставлено">{{ n.delivered }}</td>
-              <td data-label="Ошибок">{{ n.failed }}</td>
+                <th>Когда</th>
+                <th>Тип</th>
+                <th>Текст</th>
+                <th>Доставлено</th>
+                <th>Ошибок</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+            {% for n in notifs %}
+            <tr>
+                <td data-label="Когда">{{ n.sent_at.strftime('%d.%m %H:%M') }}</td>
+                <td data-label="Тип">{{ n.type }}</td>
+                <td data-label="Текст">{{ n.body[:80] }}{% if n.body|length > 80 %}…{% endif %}</td>
+                <td data-label="Доставлено">{{ n.delivered }}</td>
+                <td data-label="Ошибок">{{ n.failed }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
-  {% endif %}
+    {% endif %}
 </div>
 
 <!-- Блок участников - ИСХОДНЫЙ ВИД (БЕЗ ЛЮБЫХ ИЗМЕНЕНИЙ) -->
 <div class="card">
-  <h3>Участники</h3>
-  {% if not regs %}
+    <h3>Участники</h3>
+    {% if not regs %}
     <p>Пока никто не записался.</p>
-  {% else %}
-  <table class="participants-table">
-    <thead>
-      <tr>
-        <th>Код</th>
-        <th>Имя профиля MAX</th>
-        <th>Статус</th>
-        <th>Записан</th>
-        <th>Пришёл</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in regs %}
+    {% else %}
+    <table class="participants-table">
+        <thead>
         <tr>
-          <td data-label="Код"><code>{{ r.code }}</code></td>
-          <td data-label="Имя профиля">{{ r.username }}</td>
-          <td data-label="Статус">
-            {% if r.status == 'confirmed' %}<span class="badge badge-confirmed">Подтверждена</span>
-            {% elif r.status == 'cancelled' %}<span class="badge badge-cancelled">Отменена</span>
-            {% elif r.status == 'attended' %}<span class="badge badge-attended">Пришёл</span>
-            {% endif %}
-          </td>
-          <td data-label="Записан">{{ r.created_at.strftime('%d.%m %H:%M') }}</td>
-          <td data-label="Пришёл">{% if r.attended_at %}{{ r.attended_at.strftime('%d.%m %H:%M') }}{% endif %}</td>
+            <th>Код</th>
+            <th>Имя профиля MAX</th>
+            <th>Статус</th>
+            <th>Записан</th>
+            <th>Пришёл</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% endif %}
+        </thead>
+        <tbody>
+        {% for r in regs %}
+        <tr>
+            <td data-label="Код"><code>{{ r.code }}</code></td>
+            <td data-label="Имя профиля">{{ r.username }}</td>
+            <td data-label="Статус">
+                {% if r.status == 'confirmed' %}<span class="badge badge-confirmed">Подтверждена</span>
+                {% elif r.status == 'cancelled' %}<span class="badge badge-cancelled">Отменена</span>
+                {% elif r.status == 'attended' %}<span class="badge badge-attended">Пришёл</span>
+                {% endif %}
+            </td>
+            <td data-label="Записан">{{ r.created_at.strftime('%d.%m %H:%M') }}</td>
+            <td data-label="Пришёл">{% if r.attended_at %}{{ r.attended_at.strftime('%d.%m %H:%M') }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 </div>
 
 {% endif %}{# role != controller #}
@@ -200,611 +214,582 @@
 
 {% block head %}
 <style>
-/* ===== СУЩЕСТВУЮЩИЕ СТИЛИ (НЕ ИЗМЕНЕНЫ) ===== */
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #475569;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  border-radius: 10px;
-  background: #f1f5f9;
-  transition: all 0.15s ease;
-}
+    /* ===== СУЩЕСТВУЮЩИЕ СТИЛИ (НЕ ИЗМЕНЕНЫ) ===== */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+    }
 
-.back-link:hover {
-  background: #e2e8f0;
-  color: #2163F6;
-  text-decoration: none;
-}
+    .stat {
+        background: white;
+        border: 1px solid #eef2f6;
+        border-radius: 16px;
+        padding: 16px;
+        text-align: center;
+        transition: all 0.2s ease;
+    }
 
-@media (max-width: 768px) {
-  .back-link {
-    font-size: 15px;
-    padding: 12px 16px;
-    margin-bottom: 14px;
-  }
-}
+    .stat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
 
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-bottom: 32px;
-}
+    .stat .label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #94a3b8;
+        margin-bottom: 8px;
+    }
 
-.stat {
-  background: white;
-  border: 1px solid #eef2f6;
-  border-radius: 16px;
-  padding: 16px;
-  text-align: center;
-  transition: all 0.2s ease;
-}
+    .stat .value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0f172a;
+        word-break: break-word;
+    }
 
-.stat:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+    .card {
+        background: white;
+        border: 1px solid #eef2f6;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        transition: box-shadow 0.2s ease;
+    }
 
-.stat .label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #94a3b8;
-  margin-bottom: 8px;
-}
+    .card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
 
-.stat .value {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-  word-break: break-word;
-}
+    .card h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 16px;
+    }
 
-.card {
-  background: white;
-  border: 1px solid #eef2f6;
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 24px;
-  transition: box-shadow 0.2s ease;
-}
+    .actions-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+    }
 
-.card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 20px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: none;
+        background: #2163F6;
+        color: white;
+        text-decoration: none !important;
+        height: 40px;
+        line-height: 1;
+    }
 
-.card h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0f172a;
-  margin-bottom: 16px;
-}
+    .btn:hover {
+        transform: translateY(-1px);
+        background: #1e293b;
+    }
 
-.actions-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-}
+    .btn-secondary {
+        background: transparent;
+        color: #2163F6;
+        border: 1px solid #2163F6;
+    }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 20px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: none;
-  background: #2163F6;
-  color: white;
-  text-decoration: none !important;
-  height: 40px;
-  line-height: 1;
-}
+    .btn-secondary:hover {
+        background: #1e293b;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
 
-.btn:hover {
-  transform: translateY(-1px);
-  opacity: 0.8;
-}
+    .btn-success {
+        background: #10b981;
+    }
 
-.btn-secondary {
-  background: transparent;
-  color: #2163F6;
-  border: 1px solid #2163F6;
-}
+    .btn-success:hover {
+        background: #059669;
+    }
 
-.btn-secondary:hover {
-  background: #2163F6;
-  color: white;
-  text-decoration: none;
-  transform: translateY(-1px);
-}
+    .btn-danger {
+        background: #ef4444;
+    }
 
-.btn-success {
-  background: #10b981;
-}
+    .btn-danger:hover {
+        background: #dc2626;
+    }
 
-.btn-success:hover {
-  background: #059669;
-}
+    .field {
+        margin-bottom: 20px;
+    }
 
-.btn-danger {
-  background: #ef4444;
-}
+    .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: #475569;
+        margin-bottom: 6px;
+    }
 
-.btn-danger:hover {
-  background: #dc2626;
-}
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: all 0.2s ease;
+        background: #ffffff;
+        box-sizing: border-box;
+    }
 
-.field {
-  margin-bottom: 20px;
-}
+    .field select {
+        background-position: right 20px center;
+    }
 
-.field label {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: #475569;
-  margin-bottom: 6px;
-}
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
 
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 14px;
-  font-family: inherit;
-  transition: all 0.2s ease;
-  background: #ffffff;
-  box-sizing: border-box;
-}
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
 
-.field select {
-  background-position: right 20px center;
-}
+    .badge-confirmed {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-.field input:focus,
-.field select:focus,
-.field textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
+    .badge-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
-.badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
+    .badge-attended {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-.badge-confirmed {
-  background: #d1fae5;
-  color: #065f46;
-}
+    .badge-closed {
+        background: #fed7aa;
+        color: #9a3412;
+    }
 
-.badge-cancelled {
-  background: #fee2e2;
-  color: #991b1b;
-}
+    /* Стили для таблиц контролёров и уведомлений */
+    .controllers-table-wrapper,
+    .notifications-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 
-.badge-attended {
-  background: #dbeafe;
-  color: #1e40af;
-}
+    .controllers-table,
+    .notifications-table-wrapper table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.badge-closed {
-  background: #fed7aa;
-  color: #9a3412;
-}
+    .controllers-table th,
+    .notifications-table-wrapper th {
+        text-align: left;
+        padding: 12px 12px;
+        background: #f8fafc;
+        font-weight: 600;
+        font-size: 13px;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+    }
 
-/* Стили для таблиц контролёров и уведомлений */
-.controllers-table-wrapper,
-.notifications-table-wrapper {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
+    .controllers-table td,
+    .notifications-table-wrapper td {
+        padding: 12px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+        color: #334155;
+    }
 
-.controllers-table,
-.notifications-table-wrapper table {
-  width: 100%;
-  border-collapse: collapse;
-}
+    .controllers-table tr:hover td,
+    .notifications-table-wrapper tr:hover td {
+        background: #fafcff;
+    }
 
-.controllers-table th,
-.notifications-table-wrapper th {
-  text-align: left;
-  padding: 12px 12px;
-  background: #f8fafc;
-  font-weight: 600;
-  font-size: 13px;
-  color: #475569;
-  border-bottom: 1px solid #e2e8f0;
-}
+    /* Колонка с действием - выравнивание по правому краю */
+    .controllers-table th.action-column,
+    .controllers-table td.action-column {
+        text-align: right;
+    }
 
-.controllers-table td,
-.notifications-table-wrapper td {
-  padding: 12px 12px;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 14px;
-  color: #334155;
-}
+    /* ===== СТИЛИ ДЛЯ БЛОКА УЧАСТНИКОВ - ОРИГИНАЛЬНЫЕ (НЕ ИЗМЕНЯТЬ!) ===== */
+    /* Эти стили полностью повторяют оригинальные из патча */
+    .card table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.controllers-table tr:hover td,
-.notifications-table-wrapper tr:hover td {
-  background: #fafcff;
-}
+    .card th {
+        text-align: left;
+        padding: 8px 12px;
+        background: #f4f4f8;
+        font-weight: 600;
+        font-size: 14px;
+        border-bottom: 1px solid #ececf0;
+    }
 
-/* Колонка с действием - выравнивание по правому краю */
-.controllers-table th.action-column,
-.controllers-table td.action-column {
-  text-align: right;
-}
+    .card td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #ececf0;
+        font-size: 14px;
+        color: #334155;
+    }
 
-/* ===== СТИЛИ ДЛЯ БЛОКА УЧАСТНИКОВ - ОРИГИНАЛЬНЫЕ (НЕ ИЗМЕНЯТЬ!) ===== */
-/* Эти стили полностью повторяют оригинальные из патча */
-.card table {
-  width: 100%;
-  border-collapse: collapse;
-}
+    .card tr:hover td {
+        background: #fafcff;
+    }
 
-.card th {
-  text-align: left;
-  padding: 8px 12px;
-  background: #f4f4f8;
-  font-weight: 600;
-  font-size: 14px;
-  border-bottom: 1px solid #ececf0;
-}
+    /* Ссылка назад */
+    a[style*="color:#5f5e5a"] {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: color 0.2s ease;
+    }
 
-.card td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #ececf0;
-  font-size: 14px;
-  color: #334155;
-}
+    a[style*="color:#5f5e5a"]:hover {
+        color: #3b82f6 !important;
+        text-decoration: none;
+    }
 
-.card tr:hover td {
-  background: #fafcff;
-}
+    /* ===== НОВЫЕ СТИЛИ ДЛЯ БЛОКА КОНТРОЛЁРОВ ===== */
+    .controllers-info {
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
 
-/* Ссылка назад */
-a[style*="color:#5f5e5a"] {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: color 0.2s ease;
-}
+    .controllers-info code {
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 6px;
+        color: #2163F6;
+        font-size: 12px;
+    }
 
-a[style*="color:#5f5e5a"]:hover {
-  color: #3b82f6 !important;
-  text-decoration: none;
-}
+    /* Форма загрузки - в одну строку, выравнивание по нижнему краю */
+    .upload-form-inline {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        margin-bottom: 24px;
+    }
 
-/* ===== НОВЫЕ СТИЛИ ДЛЯ БЛОКА КОНТРОЛЁРОВ ===== */
-.controllers-info {
-  color: #64748b;
-  font-size: 13px;
-  line-height: 1.5;
-  margin-bottom: 20px;
-}
+    .upload-form-inline .file-field {
+        flex: 1;
+        margin: 0;
+        position: relative;
+    }
 
-.controllers-info code {
-  background: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 6px;
-  color: #2163F6;
-  font-size: 12px;
-}
+    #file-input {
+        position: absolute;
+        opacity: 0;
+        width: 0.1px;
+        height: 0.1px;
+        overflow: hidden;
+    }
 
-/* Форма загрузки - в одну строку, выравнивание по нижнему краю */
-.upload-form-inline {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  margin-bottom: 24px;
-}
+    .file-input-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 0 16px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        height: 40px;
+        box-sizing: border-box;
+        margin: 0;
+        line-height: 40px;
+    }
 
-.upload-form-inline .file-field {
-  flex: 1;
-  margin: 0;
-  position: relative;
-}
+    .file-input-label:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
 
-#file-input {
-  position: absolute;
-  opacity: 0;
-  width: 0.1px;
-  height: 0.1px;
-  overflow: hidden;
-}
+    .upload-form-inline .btn {
+        flex-shrink: 0;
+        margin: 0;
+    }
 
-.file-input-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 0 16px;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  height: 40px;
-  box-sizing: border-box;
-  margin: 0;
-  line-height: 40px;
-}
+    .controllers-count {
+        font-size: 15px;
+        font-weight: 600;
+        color: #334155;
+        margin: 20px 0 12px 0;
+    }
 
-.file-input-label:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
+    /* Кнопка отозвать */
+    .btn-sm {
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 16px;
+        height: 40px;
+        font-size: 14px;
+    }
 
-.upload-form-inline .btn {
-  flex-shrink: 0;
-  margin: 0;
-}
+    .inline-form {
+        display: inline;
+    }
 
-.controllers-count {
-  font-size: 15px;
-  font-weight: 600;
-  color: #334155;
-  margin: 20px 0 12px 0;
-}
+    .empty-message {
+        text-align: center;
+        padding: 24px;
+        color: #94a3b8;
+        font-size: 14px;
+        background: #fafcff;
+        border-radius: 12px;
+        margin: 0;
+    }
 
-/* Кнопка отозвать */
-.btn-sm {
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 16px;
-  height: 40px;
-  font-size: 14px;
-}
+    /* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+    @media (max-width: 1024px) {
+        .stats-row {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+    }
 
-.inline-form {
-  display: inline;
-}
+    @media (max-width: 768px) {
+        h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
 
-.empty-message {
-  text-align: center;
-  padding: 24px;
-  color: #94a3b8;
-  font-size: 14px;
-  background: #fafcff;
-  border-radius: 12px;
-  margin: 0;
-}
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
-@media (max-width: 1024px) {
-  .stats-row {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
-}
+        .stat {
+            padding: 12px;
+        }
 
-@media (max-width: 768px) {
-  h2 {
-    font-size: 22px;
-    margin-bottom: 12px;
-  }
-  
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .stat {
-    padding: 12px;
-  }
-  
-  .stat .label {
-    font-size: 11px;
-  }
-  
-  .stat .value {
-    font-size: 16px;
-    word-break: break-word;
-  }
-  
-  .actions-group {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-  
-  .actions-group .btn,
-  .actions-group form {
-    width: 100%;
-  }
-  
-  .actions-group .btn {
-    justify-content: center;
-    height: 44px;
-  }
-  
-  .card {
-    padding: 16px;
-    border-radius: 12px;
-  }
-  
-  .card h3 {
-    font-size: 17px;
-  }
-  
-  .field input,
-  .field select,
-  .field textarea {
-    font-size: 16px; /* отключает зум iOS Safari */
-  }
-  
-  /* Форма загрузки контролёров — вертикально */
-  .upload-form-inline {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  
-  .upload-form-inline .file-field {
-    width: 100%;
-  }
-  
-  .upload-form-inline .btn {
-    width: 100%;
-    height: 44px;
-  }
-  
-  /* Адаптация controllers-table и notifications-table — карточки */
-  .controllers-table,
-  .notifications-table-wrapper table {
-    min-width: 0;
-  }
-  
-  .controllers-table-wrapper,
-  .notifications-table-wrapper {
-    overflow-x: visible;
-  }
-  
-  .controllers-table,
-  .controllers-table thead,
-  .controllers-table tbody,
-  .controllers-table tr,
-  .controllers-table th,
-  .controllers-table td,
-  .notifications-table-wrapper table,
-  .notifications-table-wrapper table thead,
-  .notifications-table-wrapper table tbody,
-  .notifications-table-wrapper table tr,
-  .notifications-table-wrapper table th,
-  .notifications-table-wrapper table td {
-    display: block;
-  }
-  
-  .controllers-table thead,
-  .notifications-table-wrapper table thead {
-    display: none;
-  }
-  
-  .controllers-table tr,
-  .notifications-table-wrapper table tr {
-    margin-bottom: 12px;
-    border: 1px solid #eef2f6;
-    border-radius: 12px;
-    padding: 12px 14px;
-    background: white;
-  }
-  
-  .controllers-table td,
-  .notifications-table-wrapper table td {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border: none;
-    border-bottom: 1px solid #f1f5f9;
-    gap: 12px;
-    min-width: 0;
-  }
-  
-  .controllers-table td:last-child,
-  .notifications-table-wrapper table td:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-  
-  .controllers-table td::before,
-  .notifications-table-wrapper table td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #64748b;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    flex-shrink: 0;
-  }
-  
-  /* Выравнивание действия по правому краю на мобильных */
-  .controllers-table td.action-column {
-    justify-content: space-between;
-  }
-  
-  .btn-sm {
-    width: auto;
-    min-width: 0;
-    padding: 0 14px;
-    height: 36px;
-  }
-  
-  .btn, .btn-secondary, .btn-success, .btn-danger {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  /* Внутри строки-карточки — кнопка не на всю ширину */
-  .controllers-table .btn-sm,
-  .notifications-table-wrapper .btn-sm {
-    width: auto;
-  }
-  
-  /* Таблица участников использует базовые мобильные стили из base.html */
-  .participants-table code {
-    font-size: 11px;
-  }
-}
+        .stat .label {
+            font-size: 11px;
+        }
 
-@media (max-width: 480px) {
-  h2 {
-    font-size: 20px;
-  }
-  
-  .stats-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  
-  .card {
-    padding: 14px;
-  }
-  
-  .card h3 {
-    font-size: 16px;
-  }
-  
-  .controllers-table td::before,
-  .notifications-table-wrapper table td::before {
-    font-size: 10px;
-  }
-  
-  .controllers-table td,
-  .notifications-table-wrapper table td {
-    font-size: 13px;
-  }
-  
-  .actions-group .btn {
-    height: 42px;
-    font-size: 13px;
-  }
-}
+        .stat .value {
+            font-size: 16px;
+            word-break: break-word;
+        }
+
+        .actions-group {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .actions-group .btn,
+        .actions-group form {
+            width: 100%;
+        }
+
+        .actions-group .btn {
+            justify-content: center;
+            height: 44px;
+        }
+
+        .card {
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .card h3 {
+            font-size: 17px;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            font-size: 16px; /* отключает зум iOS Safari */
+        }
+
+        /* Форма загрузки контролёров — вертикально */
+        .upload-form-inline {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .upload-form-inline .file-field {
+            width: 100%;
+        }
+
+        .upload-form-inline .btn {
+            width: 100%;
+            height: 44px;
+        }
+
+        /* Адаптация controllers-table и notifications-table — карточки */
+        .controllers-table,
+        .notifications-table-wrapper table {
+            min-width: 0;
+        }
+
+        .controllers-table-wrapper,
+        .notifications-table-wrapper {
+            overflow-x: visible;
+        }
+
+        .controllers-table,
+        .controllers-table thead,
+        .controllers-table tbody,
+        .controllers-table tr,
+        .controllers-table th,
+        .controllers-table td,
+        .notifications-table-wrapper table,
+        .notifications-table-wrapper table thead,
+        .notifications-table-wrapper table tbody,
+        .notifications-table-wrapper table tr,
+        .notifications-table-wrapper table th,
+        .notifications-table-wrapper table td {
+            display: block;
+        }
+
+        .controllers-table thead,
+        .notifications-table-wrapper table thead {
+            display: none;
+        }
+
+        .controllers-table tr,
+        .notifications-table-wrapper table tr {
+            margin-bottom: 12px;
+            border: 1px solid #eef2f6;
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: white;
+        }
+
+        .controllers-table td,
+        .notifications-table-wrapper table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border: none;
+            border-bottom: 1px solid #f1f5f9;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .controllers-table td:last-child,
+        .notifications-table-wrapper table td:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .controllers-table td::before,
+        .notifications-table-wrapper table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #64748b;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            flex-shrink: 0;
+        }
+
+        /* Выравнивание действия по правому краю на мобильных */
+        .controllers-table td.action-column {
+            justify-content: space-between;
+        }
+
+        .btn-sm {
+            width: auto;
+            min-width: 0;
+            padding: 0 14px;
+            height: 36px;
+        }
+
+        .btn, .btn-secondary, .btn-success, .btn-danger {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Внутри строки-карточки — кнопка не на всю ширину */
+        .controllers-table .btn-sm,
+        .notifications-table-wrapper .btn-sm {
+            width: auto;
+        }
+
+        /* Таблица участников использует базовые мобильные стили из base.html */
+        .participants-table code {
+            font-size: 11px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        h2 {
+            font-size: 20px;
+        }
+
+        .stats-row {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .card {
+            padding: 14px;
+        }
+
+        .card h3 {
+            font-size: 16px;
+        }
+
+        .controllers-table td::before,
+        .notifications-table-wrapper table td::before {
+            font-size: 10px;
+        }
+
+        .controllers-table td,
+        .notifications-table-wrapper table td {
+            font-size: 13px;
+        }
+
+        .actions-group .btn {
+            height: 42px;
+            font-size: 13px;
+        }
+    }
 </style>
 {% endblock %}

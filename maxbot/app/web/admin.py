@@ -775,7 +775,7 @@ def audit_log():
 
 
 @admin_bp.route("/events/<int:event_id>/controllers/upload", methods=["POST"])
-@login_required(roles=["organizer"])
+@login_required(roles=["organizer", "admin"])
 def event_controllers_upload(event_id: int):
     """Загрузка списка контролёров из XLSX-файла.
 
@@ -862,14 +862,14 @@ def event_controllers_upload(event_id: int):
 
 
 @admin_bp.route("/events/<int:event_id>/controllers/<int:controller_id>/revoke", methods=["POST"])
-@login_required(roles=["organizer"])
+@login_required(roles=["organizer", "admin"])
 def event_controllers_revoke(event_id: int, controller_id: int):
     role, uid = _current_user()
     with session_scope() as s:
         ev = EventRepo.get(s, event_id)
         if ev is None:
             abort(404)
-        if ev.organizer_id != uid:
+        if role == "organizer" and ev.organizer_id != uid:
             abort(403)
         ok = ControllerRepo.revoke_from_event(s, event_id, controller_id)
         if ok:
