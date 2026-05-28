@@ -378,29 +378,45 @@ def _cb_register(
     # Подтверждаем callback, чтобы убрать индикатор загрузки в MAX
     client.answer_callback(callback_id, notification="Записываем...")
 
-    # 1) Первое сообщение — QR-картинка с названием мероприятия и кодом
-    qr_caption = M.REG_SUCCESS_TEMPLATE.format(
-        title=ev.title,
-        date=_format_date_full(ev.event_date),
-        location=ev.location,
-        code=code,
-    )
-    image_token = None
-    try:
-        png_bytes = render_qr_png(reg.qr_token)
-        image_token = client.upload_image(png_bytes, filename=f"qr_{reg.id}.png")
-        if not image_token:
-            log.warning("Не удалось загрузить QR-картинку для reg=%s", reg.id)
-    except Exception as e:
-        log.warning("QR render/upload failed for reg=%s: %s", reg.id, e)
-
-    if image_token:
-        client.send_message(max_user_id, qr_caption, image_token=image_token)
+    if ev.format == EventFormat.online:
+        # Онлайн-мероприятие: код и QR не нужны, только ссылка на подключение.
+        # ev.location для online-формата содержит ссылку или идентификатор встречи.
+        online_text = M.REG_SUCCESS_ONLINE_TEMPLATE.format(
+            title=ev.title,
+            date=_format_date_full(ev.event_date),
+            link=ev.location,
+        )
+        # Если location — это валидный URL, добавляем кнопку-ссылку для удобства
+        join_buttons = None
+        if ev.location.lower().startswith(("http://", "https://")):
+            join_buttons = [[
+                {"type": "link", "text": "🔗 Перейти к мероприятию", "url": ev.location}
+            ]]
+        client.send_message(max_user_id, online_text, buttons=join_buttons)
     else:
-        # Если картинка не загрузилась — отправляем только текст с кодом
-        client.send_message(max_user_id, qr_caption + "\n\n" + M.REG_QR_FAILED)
+        # Оффлайн-мероприятие: QR-картинка + код записи для контроля на входе
+        qr_caption = M.REG_SUCCESS_TEMPLATE.format(
+            title=ev.title,
+            date=_format_date_full(ev.event_date),
+            location=ev.location,
+            code=code,
+        )
+        image_token = None
+        try:
+            png_bytes = render_qr_png(reg.qr_token)
+            image_token = client.upload_image(png_bytes, filename=f"qr_{reg.id}.png")
+            if not image_token:
+                log.warning("Не удалось загрузить QR-картинку для reg=%s", reg.id)
+        except Exception as e:
+            log.warning("QR render/upload failed for reg=%s: %s", reg.id, e)
 
-    # 2) Второе сообщение — меню для дальнейших действий
+        if image_token:
+            client.send_message(max_user_id, qr_caption, image_token=image_token)
+        else:
+            # Если картинка не загрузилась — отправляем только текст с кодом
+            client.send_message(max_user_id, qr_caption + "\n\n" + M.REG_QR_FAILED)
+
+    # Меню для дальнейших действий
     client.send_message(
         max_user_id,
         M.REG_NEXT_PROMPT,
@@ -438,18 +454,42 @@ def _cb_my_regs(
     buttons: list[list[dict]] = []
     for r in regs:
         ev = r.event
-        lines.append(
-            f"• {ev.title} — {_format_date_short(ev.event_date)} — код {r.registration_code}"
-        )
+        is_online = ev.format == EventFormat.online
+
+        if is_online:
+            lines.append(
+                f"• 📡 {ev.title} — {_format_date_short(ev.event_date)} — онлайн"
+            )
+        else:
+            lines.append(
+                f"• {ev.title} — {_format_date_short(ev.event_date)} — код {r.registration_code}"
+            )
+
         # Сокращаем название если оно слишком длинное, чтобы кнопка не разваливалась
         short_title = ev.title if len(ev.title) <= 25 else ev.title[:22] + "…"
-        buttons.append([
-            {
+
+        if is_online:
+            # Для онлайна — кнопка-ссылка (если location — валидный URL), иначе callback на показ текста со ссылкой
+            if ev.location.lower().startswith(("http://", "https://")):
+                buttons.append([{
+                    "type": "link",
+                    "text": "🔗 Перейти к мероприятию",
+                    "url": ev.location,
+                }])
+            else:
+                buttons.append([{
+                    "type": "callback",
+                    "text": "🔗 Показать ссылку",
+                    "payload": f"qr:{r.id}",
+                }])
+        else:
+            # Для оффлайна — кнопка показа QR
+            buttons.append([{
                 "type": "callback",
                 "text": f"🎫 QR · {r.registration_code}",
                 "payload": f"qr:{r.id}",
-            },
-        ])
+            }])
+
         buttons.append([
             {
                 "type": "callback",
@@ -550,7 +590,7 @@ def _cb_show_qr(
     callback_id: str,
     parts: list[str],
 ) -> None:
-    """Повторно отправляет QR-картинку для существующей записи."""
+    """Повторно отправляет данные записи: QR для оффлайна, ссылку для онлайна."""
     try:
         reg_id = int(parts[1])
     except (IndexError, ValueError):
@@ -569,9 +609,26 @@ def _cb_show_qr(
         client.answer_callback(callback_id, notification="Запись неактивна")
         return
 
-    client.answer_callback(callback_id, notification="Отправляю QR...")
-
     ev = reg.event
+
+    if ev.format == EventFormat.online:
+        # Онлайн: отправляем ссылку на подключение
+        client.answer_callback(callback_id, notification="Отправляю ссылку...")
+        text = M.REG_SUCCESS_ONLINE_TEMPLATE.format(
+            title=ev.title,
+            date=_format_date_full(ev.event_date),
+            link=ev.location,
+        )
+        join_buttons = None
+        if ev.location.lower().startswith(("http://", "https://")):
+            join_buttons = [[
+                {"type": "link", "text": "🔗 Перейти к мероприятию", "url": ev.location}
+            ]]
+        client.send_message(max_user_id, text, buttons=join_buttons)
+        return
+
+    # Оффлайн: повторно генерируем и отправляем QR-картинку
+    client.answer_callback(callback_id, notification="Отправляю QR...")
     caption = M.REG_SUCCESS_TEMPLATE.format(
         title=ev.title,
         date=_format_date_full(ev.event_date),
@@ -611,9 +668,14 @@ def _handle_my_registrations(
         else:
             lines = ["🎫 Ваши активные записи:\n"]
             for r in active:
-                lines.append(
-                    f"• {r.event.title} — {_format_date_short(r.event.event_date)} — код {r.registration_code}"
-                )
+                if r.event.format == EventFormat.online:
+                    lines.append(
+                        f"• 📡 {r.event.title} — {_format_date_short(r.event.event_date)} — онлайн"
+                    )
+                else:
+                    lines.append(
+                        f"• {r.event.title} — {_format_date_short(r.event.event_date)} — код {r.registration_code}"
+                    )
             client.send_message(max_user_id, "\n".join(lines), buttons=_menu_buttons())
 
 
