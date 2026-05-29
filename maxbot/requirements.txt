@@ -7,3 +7,4 @@ qrcode[pil]==8.0
 openpyxl==3.1.5
 bcrypt==4.2.1
 gunicorn==23.0.0
+pytest
